@@ -18,7 +18,7 @@
 function ilkiniDon(stringArray, callback) {
   return callback(stringArray[0])
 }
-console.log('örnek görev:', ilkiniDon(['as','sa'],function(metin){return metin+metin}));
+console.log('örnek görev:', ilkiniDon(['as', 'sa'], function (metin) { return metin + metin }));
 
 // Başlangıç Challenge'ı Sonu
 
@@ -30,17 +30,19 @@ console.log('örnek görev:', ilkiniDon(['as','sa'],function(metin){return metin
   Aşağıdaki skor1 ve skor2 kodlarını inceleyiniz ve aşağıdaki soruları altına not alarak cevaplayın
   
   1. skor1 ve skor2 arasındaki fark nedir?
-  
+  skor2 globalde bir var tanımlamış ve çalıştıkça onu güncelliyor. skor1 ise kendi içerisinde bir var a sahip çalıştıkça onu güncelliyor. bu şekilde global scopetan skora ulaşmak mümkün olmayacak.
   2. Hangisi bir closure kullanmaktadır? Nasıl tarif edebilirsin? (yarınki derste öğreneceksin :) )
-  
+  skor1 closure kullanıyor. kendi içinde bir fonksiyon çalıştırıyor.
   3. Hangi durumda skor1 tercih edilebilir? Hangi durumda skor2 daha mantıklıdır?
+  kodun başka alanında skor listesi gerekli olmayacaksa ve yalnızca fonksiyon çalıştıkça saydırmak istiyorsan skor1 kullanılmalı. mantıklı olması projenın ihtiyacına bağlı olacaktır.
+
 */
 
 // skor1 kodları
 function skorArtirici() {
   let skor = 0;
   return function skorGuncelle() {
-   return skor++;
+    return skor++;
   }
 }
 
@@ -64,9 +66,10 @@ Aşağıdaki takimSkoru() fonksiyonununda aşağıdakileri yapınız:
 Not: Bu fonskiyon, aşağıdaki diğer görevler için de bir callback fonksiyonu olarak da kullanılacak
 */
 
-function takimSkoru(/*Kodunuzu buraya yazınız*/){
-    /*Kodunuzu buraya yazınız*/
-}
+function takimSkoru() {
+  // return Math.random() * (max - min) + min;
+  return Math.floor(Math.random() * (11 - 9) + 9);
+};
 
 
 
@@ -84,11 +87,22 @@ Aşağıdaki macSonucu() fonksiyonununda aşağıdakileri yapınız:
   "EvSahibi": 92,
   "KonukTakim": 80
 }
-*/ 
+*/
 
-function macSonucu(/*Kodunuzu buraya yazınız*/){
-  /*Kodunuzu buraya yazınız*/
-}
+function macSonucu(callback, ceyrekSayisi) {
+  const sonuc = {
+    "EvSahibi": 0,
+    "KonukTakim": 0
+  };
+  for (let i = 1; i <= ceyrekSayisi; i++) {
+    for (let takim in sonuc) {
+      sonuc[takim] += callback();
+    };
+  };
+  return sonuc
+};
+
+console.log(macSonucu(takimSkoru, 4));
 
 
 
@@ -109,10 +123,15 @@ Aşağıdaki periyotSkoru() fonksiyonununda aşağıdakileri yapınız:
   */
 
 
-function periyotSkoru(/*Kodunuzu buraya yazınız*/) {
-  /*Kodunuzu buraya yazınız*/
+function periyotSkoru(callback) {
+  const sonuc = {
+    "EvSahibi": callback(),
+    "KonukTakim": callback()
+  };
+  return sonuc;
+};
 
-}
+console.log(periyotSkoru(takimSkoru));
 
 
 /* Zorlayıcı Görev 5: skorTabelasi() 
@@ -146,15 +165,37 @@ MAÇ UZAR ise skorTabelasi(periyotSkoru,takimSkoru,4)
 ] */
 // NOTE: Bununla ilgili bir test yoktur. Eğer logladığınız sonuçlar yukarıdakine benziyor ise tmamlandı sayabilirsiniz.
 
-function skorTabelasi(/*Kodunuzu buraya yazınız*/) {
-  /*Kodunuzu buraya yazınız*/
-}
+function skorTabelasi(callback1, callback2, ceyrekSayisi) {
+  const skorDizisi = [];
+  const skorlar = [];
+  for (let i = 1; i <= ceyrekSayisi; i++) {
+    const randomSkor = callback1(callback2);
+    skorDizisi.push(`${i}. Periyot: Ev Sahibi ${randomSkor["EvSahibi"]} - Konuk Takım ${randomSkor["KonukTakim"]}`)
+    skorlar.push({ ...randomSkor, periyotIndex: i });
+  };
+  let toplamSkorEvSahibi= 0;
+  let toplamSkorKonukTakim= 0;
+  for(let i=0; i < skorlar.length; i++){
+    toplamSkorEvSahibi += skorlar[i]["EvSahibi"];
+    toplamSkorKonukTakim += skorlar[i]["KonukTakim"];
+  };
+  while(toplamSkorEvSahibi === toplamSkorKonukTakim) {
+    const uzatmaRandomSkor = callback1(callback2);
+    skorDizisi.push(`${skorlar.length-3}. Uzatma: Ev Sahibi ${uzatmaRandomSkor["EvSahibi"]} - Konuk Takım ${uzatmaRandomSkor["KonukTakim"]}`)
+    skorlar.push({ ...uzatmaRandomSkor, periyotIndex: skorlar.length+1 });
+    toplamSkorEvSahibi += uzatmaRandomSkor["EvSahibi"];
+    toplamSkorKonukTakim += uzatmaRandomSkor["KonukTakim"];
+  };
+  
+  skorDizisi.push(`Maç Sonucu: Ev Sahibi ${toplamSkorEvSahibi} - Konuk Takım ${toplamSkorKonukTakim}`);
+  return skorDizisi;
+};
 
-
+console.log(skorTabelasi(periyotSkoru, takimSkoru, 4));
 
 
 /* Aşağıdaki satırları lütfen değiştirmeyiniz*/
-function sa(){
+function sa() {
   console.log('Kodlar çalışıyor');
   return 'as';
 }
